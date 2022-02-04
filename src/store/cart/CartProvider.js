@@ -16,6 +16,7 @@ const ItemsReducer = (state, action) => {
     //alternative
     // const updatedItems = [...state.items];
     // updatedItems.unshift(action.newItem);
+
     return { items: updatedItems, totalAmount: state.totalAmount + action.newItem.price * action.newItem.amount };
   }
 };

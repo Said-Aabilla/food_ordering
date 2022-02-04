@@ -8,10 +8,12 @@ const MealItem = (props) => {
   const context = useContext(CartContext);
  
   const addToCartHandler = (amount) => {
+
     const ItemToAdd = {
       id: props.id,
       name: props.name,
       description: props.description,
+      price:props.price,
       amount: amount,
     };
 
