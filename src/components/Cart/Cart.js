@@ -11,8 +11,12 @@ const Cart = (props) => {
     props.onHideCartHandler();
   };
 
-  const addItemToCartHandler= (item)=>{}
-  const removeItemFromCartHandler= (id)=>{}
+  const addItemToCartHandler= (item)=>{
+    cartCtx.addItem({...item, amount:1})
+  }
+  const removeItemFromCartHandler= (id)=>{
+    cartCtx.removeItem(id)
+  }
 
   const cartItems = (
     <ul className={classes["cart-items"]}>
@@ -20,9 +24,9 @@ const Cart = (props) => {
         <CartItem 
         price={item.price}
         name={item.name}
-        amount={item.amounr}
-        onAdd={addItemToCartHandler}
-        onRemove={removeItemFromCartHandler}
+        amount={item.amount}
+        onAdd={addItemToCartHandler.bind(null,item)}
+        onRemove={removeItemFromCartHandler.bind(null,item.id)}
         />
       ))}
     </ul>
