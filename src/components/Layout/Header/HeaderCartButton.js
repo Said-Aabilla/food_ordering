@@ -1,22 +1,47 @@
-import { useContext } from 'react';
-import CartIcon from '../../Cart/CartIcon';
-import classes from './HeaderCartButton.module.css';
-import CartContext from '../../../store/cart/cart-context';
+import { useContext, useState } from "react";
+import CartIcon from "../../Cart/CartIcon";
+import classes from "./HeaderCartButton.module.css";
+import CartContext from "../../../store/cart/cart-context";
+import { useEffect } from "react";
 
 const HeaderCartButton = (props) => {
+  const cartContext = useContext(CartContext);
+  const [isButtonHighlighted, setIsButtonHighlighted] = useState(false);
 
-  const context = useContext(CartContext);
-
-  const numberOfCartItems = context.items.reduce((curNumber, item) => {
+  const numberOfCartItems = cartContext.items.reduce((curNumber, item) => {
     return curNumber + item.amount;
   }, 0);
-  
+
+  const btnClasses = `${classes.button} ${
+    //add a bump to the button when an item is changed
+    isButtonHighlighted ? classes.bump : ""
+  }`;
+
+  const { items } = cartContext;
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    //set the highlight
+    setIsButtonHighlighted(true);
+
+    //remove the bump style after 300ms
+    const timer = setTimeout(() => {
+      setIsButtonHighlighted(false);
+    }, 300);
+
+    //clean up
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [items]);
+
   const showCart = () => {
-     props.onCartButtonClick()
-  }
+    props.onCartButtonClick();
+  };
 
   return (
-    <button className={classes.button} onClick={showCart}>
+    <button className={btnClasses} onClick={showCart}>
       <span className={classes.icon}>
         <CartIcon />
       </span>
