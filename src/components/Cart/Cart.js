@@ -34,7 +34,11 @@ const Cart = (props) => {
   const catchResponse = (response) => {
     if (response.name) {
       setDidSubmit((prevState) => true);
+      cartCtx.clearCart();
     }
+    setTimeout(() => {
+      closeCartHandler();
+    }, 3000);
   };
 
   const submitCheckoutHandler = (data) => {
@@ -108,7 +112,7 @@ const Cart = (props) => {
     <Modal>
       {!didSubmit && !isLoading && modalContent}
       {!didSubmit && isLoading && <p>sending order...</p>}
-      {!didSubmit &&error && <p>{error}</p>}
+      {!didSubmit && error && <p>{error}</p>}
       {didSubmit && <p>Order submitted successfully!</p>}
     </Modal>
   );
