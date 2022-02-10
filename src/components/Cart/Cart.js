@@ -4,11 +4,16 @@ import classes from "./Cart.module.css";
 import CartContext from "../../store/cart/cart-context";
 import CartItem from "./CartItem";
 import Checkout from "./Checkout/Checkout";
+import useHttp from "../../hooks/use-http";
 
 const Cart = (props) => {
+  //Custom hook to send checkout
+  const { isLoading, error, sendRequest: sendCheckout } = useHttp();
+
   const cartCtx = useContext(CartContext);
   const hasItems = cartCtx.items.length > 0;
   const [isCheckout, setIsCheckout] = useState(false);
+  const [didSubmit, setDidSubmit] = useState(false);
 
   const closeCartHandler = () => {
     props.onHideCartHandler();
@@ -23,6 +28,32 @@ const Cart = (props) => {
 
   const orderClickHandler = () => {
     setIsCheckout((prevState) => true);
+  };
+
+  //this executes once the request is sent, it receives the response
+  const catchResponse = (response) => {
+    if (response.name) {
+      setDidSubmit((prevState) => true);
+    }
+  };
+
+  const submitCheckoutHandler = (data) => {
+    const checkoutBody = {
+      ...data,
+      meals: cartCtx.items,
+      amount: cartCtx.totalAmount,
+    };
+    sendCheckout(
+      {
+        url: "https://react-http-a0d8b-default-rtdb.firebaseio.com/checkouts.json",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(checkoutBody),
+      },
+      catchResponse
+    );
   };
 
   //cart items
@@ -55,15 +86,30 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal>
+  //cart modal content
+  const modalContent = (
+    <>
       {cartItems}
       <div className={classes.total}>
         <span>Total Amount</span>
         <span>{`$${cartCtx.totalAmount.toFixed(2)}`}</span>
       </div>
       {!isCheckout && modalActions}
-      {isCheckout && <Checkout onCancel={closeCartHandler} />}
+      {isCheckout && (
+        <Checkout
+          onSubmit={submitCheckoutHandler}
+          onCancel={closeCartHandler}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <Modal>
+      {!didSubmit && !isLoading && modalContent}
+      {!didSubmit && isLoading && <p>sending order...</p>}
+      {!didSubmit &&error && <p>{error}</p>}
+      {didSubmit && <p>Order submitted successfully!</p>}
     </Modal>
   );
 };

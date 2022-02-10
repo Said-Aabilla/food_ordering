@@ -1,20 +1,13 @@
-import { useRef, useState, useContext } from "react";
+import { useRef, useState } from "react";
 
 import classes from "./Checkout.module.css";
-import useHttp from "../../../hooks/use-http";
-import CartContext from "../../../store/cart/cart-context";
 
 //helpers to validate user inputs
 const isEmpty = (value) => value.trim() === "";
 const isFiveChars = (value) => value.trim().length === 5;
 
 const Checkout = (props) => {
-  //Custom hook to send checkout
-  const { isLoading, error, sendRequest: sendCheckout } = useHttp();
-
-  //cart context
-  const cartContext = useContext(CartContext);
-
+  
   //state of the inputs validity
   const [formInputsValidity, setFormInputsValidity] = useState({
     name: true,
@@ -63,11 +56,9 @@ const Checkout = (props) => {
       return;
     }
 
-    // Submit cart data
-    //construct the body
+    //construct the data
     const checkoutBody = {
       id: Math.random().toString,
-      meals: cartContext.items,
       client: {
         name: enteredName,
         street: enteredStreet,
@@ -75,19 +66,10 @@ const Checkout = (props) => {
         postalCode: enteredPostalCode,
       },
     };
-    (sendCheckout(
-      {
-        url: "https://react-http-a0d8b-default-rtdb.firebaseio.com/checkouts.json",
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: checkoutBody
-      },
-      () => {}
-    ))();
-
     
+    //send the data
+    props.onSubmit(checkoutBody);
+
   };
 
   const nameControlClasses = `${classes.control} ${
@@ -105,7 +87,6 @@ const Checkout = (props) => {
 
   return (
     <form className={classes.form} onSubmit={confirmHandler}>
-      {error && <p>{error}</p>}
       <div className={nameControlClasses}>
         <label htmlFor="name">Your Name</label>
         <input type="text" id="name" ref={nameInputRef} />
